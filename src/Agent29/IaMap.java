@@ -102,4 +102,3 @@ public class IaMap extends HashMap<Issue, List<ValueNew>> {
         return utility;
     }
 }
-
