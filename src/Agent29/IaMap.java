@@ -97,7 +97,7 @@ public class IaMap extends HashMap<Issue, List<ValueNew>> {
             }
         }
 
-        System.out.println(countBidNumber + "-> Group29: The utility of opponent is " + utility);
+        // System.out.println(countBidNumber + "-> Group29: The utility of opponent is " + utility);
 
         return utility;
     }

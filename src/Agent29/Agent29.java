@@ -15,8 +15,10 @@ import genius.core.actions.Offer;
 import genius.core.parties.AbstractNegotiationParty;
 import genius.core.parties.NegotiationInfo;
 import genius.core.uncertainty.BidRanking;
+import genius.core.uncertainty.ExperimentalUserModel;
 import genius.core.utility.AbstractUtilitySpace;
 import genius.core.utility.AdditiveUtilitySpace;
+import genius.core.utility.UncertainAdditiveUtilitySpace;
 
 /**
  * ExampleAgent returns the bid that maximizes its own utility for half of the negotiation session.
@@ -38,13 +40,36 @@ public class Agent29 extends AbstractNegotiationParty {
     public void init(NegotiationInfo info) {
         super.init(info);
         this.iaMap=new IaMap(userModel);
-        GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(userModel);
-        this.predictAbstractSpace = geneticAlgorithm.geneticAlgorithm();
+        // GeneticAlgorithm geneticAlgorithm = new GeneticAlgorithm(userModel);
+        // this.predictAbstractSpace = geneticAlgorithm.geneticAlgorithm();
+        UserPrefElicit userPref = new UserPrefElicit(userModel);
+        predictAbstractSpace = userPref.geneticAlgorithm();
         this.predictAddtiveSpace = (AdditiveUtilitySpace)predictAbstractSpace;
         this.bidRanking = userModel.getBidRanking();
         this.maxBidForme = bidRanking.getMaximalBid();
         this.concessionValue = 0.8;
+//        for (int i = 0; i < 10; i ++) {
+//            Bid testBid = bidRanking.getRandomBid();
+//            utilityError(testBid);
+//        }
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out)));
+
+    }
+
+    private double utilityError(Bid bid) {
+        ExperimentalUserModel e = (ExperimentalUserModel) userModel;
+        UncertainAdditiveUtilitySpace realUSpace = e.getRealUtilitySpace();
+        double ret = Math.abs(this.predictAddtiveSpace.getUtility(bid) - realUSpace.getUtility(bid));
+        System.out.println("Utility Error: " + ret);
+        return ret;
+    }
+
+    private double disagreeUtility(double disagreePercent) {
+        List<Bid> bidList = userModel.getBidRanking().getBidOrder();
+        int bidListSize = bidList.size();
+        int disagreeIndex = (int)Math.ceil(bidListSize * disagreePercent);
+        double ret = this.predictAddtiveSpace.getUtility(bidList.get(disagreeIndex));
+        return ret;
     }
 
     /**
